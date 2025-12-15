@@ -1,18 +1,12 @@
 import streamlit as st 
 import pandas as pd
 import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
-import os
 
-# Määritetään polku suhteessa skriptin sijaintiin
-script_dir = os.path.dirname(os.path.abspath(__file__))
-location_data_path = os.path.join(script_dir, 'data', 'Location.csv')
-accelerometer_data_path = os.path.join(script_dir, 'data', 'Linear Accelerometer.csv')
-
-# Ladataan datatiedostot
-df_location_data = pd.read_csv(location_data_path)
-df_accelerometer_data = pd.read_csv(accelerometer_data_path)
+# Ladataan data suoraan GitHubista
+github_base_url = 'https://raw.githubusercontent.com/villepekkaa/SporttiAppi-Python/main/data/'
+df_location_data = pd.read_csv(github_base_url + 'Location.csv')
+df_accelerometer_data = pd.read_csv(github_base_url + 'Linear Accelerometer.csv')
 
 #Annetaan visualisoinnille otsikko
 st.title('Aamureippailu')
