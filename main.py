@@ -9,7 +9,7 @@ df_location_data = pd.read_csv(github_base_url + 'Location.csv')
 df_accelerometer_data = pd.read_csv(github_base_url + 'Linear%20Accelerometer.csv')
 
 #Annetaan visualisoinnille otsikko
-st.title('Aamureippailu')
+st.title('SporttiAppi')
 
 #Tuodaan filtterifunktiot.
 from scipy.signal import butter,filtfilt
@@ -117,7 +117,7 @@ steps_fourier = f_max * np.max(t)
 st.subheader('Askelmäärät eri menetelmillä')
 col1, col2 = st.columns(2)
 with col1:
-    st.metric(label="Nollaylitysmenetelmä (suodatettu data)", value=f"{int(jaksot)} askelta")
+    st.metric(label="Suodatettu data", value=f"{int(jaksot)} askelta")
     st.caption("Laskettu suodatetun signaalin nollakohtien perusteella")
 with col2:
     st.metric(label="Fourier-analyysi", value=f"{int(steps_fourier)} askelta")
@@ -144,10 +144,10 @@ kokonaisaika = df['Time (s)'].max()
 askelmäärä = jaksot  
 
 # Keskinopeus
-keskinopeus_km_h = (kokonaismatka / kokonaisaika) * 3600  # km/h
+keskinopeus_km_h = (kokonaismatka / kokonaisaika) * 3600  
 
 # Askelpituus
-askelpituus = (kokonaismatka * 1000) / askelmäärä  # metriä
+askelpituus = (kokonaismatka * 1000) / askelmäärä  
 
 # Näytetään tilastot Streamlitissä
 st.subheader('Harjoituksen tilastot')
@@ -156,7 +156,6 @@ with col1:
     st.metric(label="Matka", value=f"{kokonaismatka:.3f} km")
 with col2:
     st.metric(label="Keskinopeus", value=f"{keskinopeus_km_h:.2f} km/h")
-
 with col3:
     st.metric(label="Askelpituus", value=f"{askelpituus:.2f} m")
 with col4:
@@ -180,7 +179,7 @@ from streamlit_folium import st_folium
 lat1 = df['Latitude (°)'].mean()
 long1 = df['Longitude (°)'].mean()
 
-#luodaan kartta
+#Luodaan kartta
 my_map = folium.Map(location=[lat1, long1], zoom_start=15)
 
 #Piirretään reitti kartalle
