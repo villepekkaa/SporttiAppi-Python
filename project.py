@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 # Ladataan data suoraan GitHubista
 github_base_url = 'https://raw.githubusercontent.com/villepekkaa/SporttiAppi-Python/main/data/'
 df_location_data = pd.read_csv(github_base_url + 'Location.csv')
-df_accelerometer_data = pd.read_csv(github_base_url + 'Linear Accelerometer.csv')
+df_accelerometer_data = pd.read_csv(github_base_url + 'Linear%20Accelerometer.csv')
 
 #Annetaan visualisoinnille otsikko
 st.title('Aamureippailu')
