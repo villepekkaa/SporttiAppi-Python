@@ -50,10 +50,6 @@ def haversine(lon1, lat1, lon2, lat2):
     r = 6371 # Radius of earth in kilometers. Use 3956 for miles. Determines return value units.
     return c * r
 
-#Data suodatetaan alipäästösuodattimella, joka poistaa siitä valittua cut-off -taajuutta suuremmilla
-#taajuuksilla tapahtuvat vaihtelut.
-#Käytännössä dataa "tasoitetaan", eli alipäästösuodatin vastaa jossain määrin liukuvaa keskiarvoa.
-
 # Suodatetaan ensimmäiset 20 sekuntia pois kiihtyvyysdatasta
 df_accel = df_accelerometer_data[df_accelerometer_data['Time (s)'] > 20].copy()
 df_accel = df_accel.reset_index(drop=True)
@@ -63,11 +59,9 @@ data = df_accel['Y (m/s^2)']
 T_tot = df_accel['Time (s)'].max() #Koko datan pituus
 n = len(df_accel['Time (s)']) #Datapisteiden lukumäärä
 fs = n/T_tot #Näytteenottotaajus, OLETETAAN VAKIOKSI
-nyq = fs/2 #Nyqvistin taajuus, suurin taajuus, joka datasta voidaan havaita
+nyq = fs/2 #Nyqvistin taajuus
 order = 3
 cutoff = 1 / 0.1  #Cut-off taajuus, tätä suuremmat taajuuden alipäästösuodatin poistaa datasta
-#Cut-off -taajuuden tulee olla riittävän pieni, jotta data yleensäkin suodattuu
-#Cut-off -taajuuden ei tule olla niin pieni, että se suodattaisi pois askelia
 data_filt = butter_lowpass_filter(data, cutoff, nyq, order)
 
 #Piirretään kuvaa, jossa alkuperäinen ja suodatettu signaali
@@ -80,11 +74,10 @@ plt.grid()
 plt.legend()
 st.pyplot(fig1)
 
-#Lasketaan askeleet
 #Tutkitaan, kuinka usein suodatettu signaali ylittää nollatason
 jaksot = 0
 for i in range(n-1):
-    if data_filt[i]/data_filt[i+1] < 0: #True jos arvoilla data_filt[i] ja data_filt[i+1] on eri etumerkki --> nollan ylitys
+    if data_filt[i]/data_filt[i+1] < 0: 
         jaksot = jaksot + 1/2
 
 # Fourier-analyysi tehospektrin laskemiseksi
@@ -114,6 +107,7 @@ f_max = freq[L][psd[L] == np.max(psd[L])][0]
 T = 1/f_max
 steps_fourier = f_max * np.max(t)
 
+#Aslelmäärät
 st.subheader('Askelmäärät eri menetelmillä')
 col1, col2 = st.columns(2)
 with col1:
@@ -183,7 +177,7 @@ long1 = df['Longitude (°)'].mean()
 my_map = folium.Map(location=[lat1, long1], zoom_start=15)
 
 #Piirretään reitti kartalle
-route = folium.PolyLine(df[['Latitude (°)','Longitude (°)']], color='red', weight=3)
+route = folium.PolyLine(df[['Latitude (°)','Longitude (°)']], color='blue', weight=3)
 route.add_to(my_map)
 
 #Zoomaa kartta reitin mukaan
