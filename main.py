@@ -8,7 +8,7 @@ github_base_url = 'https://raw.githubusercontent.com/villepekkaa/SporttiAppi-Pyt
 df_location_data = pd.read_csv(github_base_url + 'Location.csv')
 df_accelerometer_data = pd.read_csv(github_base_url + 'Linear%20Accelerometer.csv')
 
-#Annetaan visualisoinnille otsikko
+#Visualisoinnin otsikko
 st.title('SporttiAppi')
 
 #Tuodaan filtterifunktiot.
@@ -24,7 +24,6 @@ def butter_highpass_filter(data, cutoff,  nyq, order):
     b, a = butter(order, normal_cutoff, btype='high', analog=False)
     y = filtfilt(b, a, data)
     return y
-
 
 # Suodatetaan ensimmäiset 20 sekuntia pois
 df = df_location_data[df_location_data['Time (s)'] > 20]
@@ -46,6 +45,30 @@ def haversine(lon1, lat1, lon2, lat2):
     c = 2 * asin(sqrt(a)) 
     r = 6371 # Radius of earth in kilometers. Use 3956 for miles. Determines return value units.
     return c * r
+
+# Lasketaan kuljettu matka ja tilastot heti otsikon jälkeen
+import numpy as np
+df['Distance_calc'] = np.zeros(len(df))
+for i in range(len(df)-1):
+    lon1 = df['Longitude (°)'][i]
+    lon2 = df['Longitude (°)'][i+1]
+    lat1 = df['Latitude (°)'][i]
+    lat2 = df['Latitude (°)'][i+1]
+    df.loc[i+1,'Distance_calc'] = haversine(lon1, lat1, lon2, lat2)
+df['total_distance'] = df['Distance_calc'].cumsum()
+kokonaismatka = df['total_distance'].max()  
+kokonaisaika = df['Time (s)'].max()  
+keskinopeus_km_h = (kokonaismatka / kokonaisaika) * 3600  
+
+#Tulostetaan harjoituksen tilastot sarakkeisiin
+st.subheader('Harjoituksen tilastot')
+col1, col2, col3 = st.columns(3)
+with col1:
+    st.metric(label="Matka", value=f"{kokonaismatka:.3f} km")
+with col2:
+    st.metric(label="Keskinopeus", value=f"{keskinopeus_km_h:.2f} km/h")
+with col3:
+    st.metric(label="Kesto", value=f"{kokonaisaika/60:.1f} min")
 
 # Suodatetaan ensimmäiset 20 sekuntia pois kiihtyvyysdatasta
 df_accel = df_accelerometer_data[df_accelerometer_data['Time (s)'] > 20].copy()
@@ -110,47 +133,15 @@ col1, col2 = st.columns(2)
 with col1:
     st.metric(label="Suodatettu data", value=f"{int(jaksot)} askelta")
     st.caption("Laskettu suodatetun signaalin nollakohtien perusteella")
+    st.metric(label="Askelpituus", value=f"{(kokonaismatka * 1000 / jaksot):.2f} m" if jaksot != 0 else "-")
 with col2:
     st.metric(label="Fourier-analyysi", value=f"{int(steps_fourier)} askelta")
     st.caption(f"Dominoiva taajuus: {f_max:.2f} Hz | Jaksonaika: {T:.2f} s")
+    st.metric(label="Askelpituus", value=f"{(kokonaismatka * 1000 / steps_fourier):.2f} m" if steps_fourier != 0 else "-")
 
-#Lasketaan kuljettu matka
-import numpy as np
-df['Distance_calc'] = np.zeros(len(df))
-
-#lasketaan väimatka havaintopisteiden välillä käyttäen For-luuppia
-for i in range(len(df)-1):
-    lon1 = df['Longitude (°)'][i]
-    lon2 = df['Longitude (°)'][i+1]
-    lat1 = df['Latitude (°)'][i]
-    lat2 = df['Latitude (°)'][i+1]
-    df.loc[i+1,'Distance_calc'] = haversine(lon1, lat1, lon2, lat2)
-
-#Lasketaan kokonaismatka mittapisteiden välisestä matkasta
-df['total_distance'] = df['Distance_calc'].cumsum()
-
-# Lasketaan keskinopeus ja askelpituus
-kokonaismatka = df['total_distance'].max()  
-kokonaisaika = df['Time (s)'].max()  
-askelmäärä = jaksot  
-
-# Keskinopeus
-keskinopeus_km_h = (kokonaismatka / kokonaisaika) * 3600  
-
-# Askelpituus
-askelpituus = (kokonaismatka * 1000) / askelmäärä  
-
-# Näytetään tilastot Streamlitissä
-st.subheader('Harjoituksen tilastot')
-col1, col2, col3, col4 = st.columns(4)
-with col1:
-    st.metric(label="Matka", value=f"{kokonaismatka:.3f} km")
-with col2:
-    st.metric(label="Keskinopeus", value=f"{keskinopeus_km_h:.2f} km/h")
-with col3:
-    st.metric(label="Askelpituus", value=f"{askelpituus:.2f} m")
-with col4:
-    st.metric(label="Kesto", value=f"{kokonaisaika/60:.1f} min")
+# Päivitetään askelmäärä ja askelpituus tilastoihin
+askelmäärä = jaksot
+askelpituus = (kokonaismatka * 1000) / askelmäärä if askelmäärä != 0 else 0
     
 #Kartta
 st.subheader('Kuljettu reitti kartalla')
