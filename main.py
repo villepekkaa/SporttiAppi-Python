@@ -128,7 +128,7 @@ T = 1/f_max
 steps_fourier = f_max * np.max(t)
 
 #Aslelmäärät
-st.subheader('Askelmäärät eri menetelmillä')
+st.subheader('Askelmäärät kahdella eri menetelmällä')
 col1, col2 = st.columns(2)
 with col1:
     st.metric(label="Suodatettu data", value=f"{int(jaksot)} askelta")
