@@ -64,47 +64,6 @@ order = 3
 cutoff = 1 / 0.1  #Cut-off taajuus, tätä suuremmat taajuuden alipäästösuodatin poistaa datasta
 data_filt = butter_lowpass_filter(data, cutoff, nyq, order)
 
-# Näytetään tilastot Streamlitissä
-st.subheader('Harjoituksen tilastot')
-col1, col2, col3, col4 = st.columns(4)
-with col1:
-    st.metric(label="Matka", value=f"{kokonaismatka:.3f} km")
-with col2:
-    st.metric(label="Keskinopeus", value=f"{keskinopeus_km_h:.2f} km/h")
-with col3:
-    st.metric(label="Askelpituus", value=f"{askelpituus:.2f} m")
-with col4:
-    st.metric(label="Kesto", value=f"{kokonaisaika/60:.1f} min")
-    
-st.subheader('Matka ajan funktiona')
-import matplotlib.pyplot as plt
-fig, ax = plt.subplots(figsize=(10,5))
-plt.plot(df['Time (s)'],df['total_distance'])
-plt.ylabel('Kokonaismatka [km]')
-plt.xlabel('Aika [s]')
-st.pyplot(fig)
-
-#Kartta
-st.subheader('Kuljettu reitti kartalla')
-import folium
-from streamlit_folium import st_folium
-
-#Määritellään kartan keskipiste
-lat1 = df['Latitude (°)'].mean()
-long1 = df['Longitude (°)'].mean()
-
-#Luodaan kartta
-my_map = folium.Map(location=[lat1, long1], zoom_start=15)
-
-#Piirretään reitti kartalle
-route = folium.PolyLine(df[['Latitude (°)','Longitude (°)']], color='blue', weight=3)
-route.add_to(my_map)
-
-#Zoomaa kartta reitin mukaan
-my_map.fit_bounds(route.get_bounds())
-
-st_map = st_folium(my_map, width=900, height=650)
-
 #Piirretään kuvaa, jossa alkuperäinen ja suodatettu signaali
 st.subheader('Suodatetun kiihtyvyysdatan Y-komponentti')
 fig1, ax1 = plt.subplots(figsize=(12,4))
@@ -184,3 +143,44 @@ keskinopeus_km_h = (kokonaismatka / kokonaisaika) * 3600
 # Askelpituus
 askelpituus = (kokonaismatka * 1000) / askelmäärä  
 
+# Näytetään tilastot Streamlitissä
+st.subheader('Harjoituksen tilastot')
+col1, col2, col3, col4 = st.columns(4)
+with col1:
+    st.metric(label="Matka", value=f"{kokonaismatka:.3f} km")
+with col2:
+    st.metric(label="Keskinopeus", value=f"{keskinopeus_km_h:.2f} km/h")
+with col3:
+    st.metric(label="Askelpituus", value=f"{askelpituus:.2f} m")
+with col4:
+    st.metric(label="Kesto", value=f"{kokonaisaika/60:.1f} min")
+    
+
+st.subheader('Matka ajan funktiona')
+import matplotlib.pyplot as plt
+fig, ax = plt.subplots(figsize=(10,5))
+plt.plot(df['Time (s)'],df['total_distance'])
+plt.ylabel('Kokonaismatka [km]')
+plt.xlabel('Aika [s]')
+st.pyplot(fig)
+
+#Kartta
+st.subheader('Kuljettu reitti kartalla')
+import folium
+from streamlit_folium import st_folium
+
+#Määritellään kartan keskipiste
+lat1 = df['Latitude (°)'].mean()
+long1 = df['Longitude (°)'].mean()
+
+#Luodaan kartta
+my_map = folium.Map(location=[lat1, long1], zoom_start=15)
+
+#Piirretään reitti kartalle
+route = folium.PolyLine(df[['Latitude (°)','Longitude (°)']], color='blue', weight=3)
+route.add_to(my_map)
+
+#Zoomaa kartta reitin mukaan
+my_map.fit_bounds(route.get_bounds())
+
+st_map = st_folium(my_map, width=900, height=650)
