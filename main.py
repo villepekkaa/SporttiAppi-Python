@@ -36,10 +36,7 @@ df['Time (s)'] = df['Time (s)'] - df['Time (s)'].min()
 #Lasketaan matka käyttäen Haversinen kaava
 from math import radians, cos, sin, asin, sqrt
 def haversine(lon1, lat1, lon2, lat2):
-    """
-    Calculate the great circle distance in kilometers between two points 
-    on the earth (specified in decimal degrees)
-    """
+
     # convert decimal degrees to radians 
     lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
     # haversine formula 
@@ -155,15 +152,6 @@ with col3:
 with col4:
     st.metric(label="Kesto", value=f"{kokonaisaika/60:.1f} min")
     
-
-st.subheader('Matka ajan funktiona')
-import matplotlib.pyplot as plt
-fig, ax = plt.subplots(figsize=(10,5))
-plt.plot(df['Time (s)'],df['total_distance'])
-plt.ylabel('Kokonaismatka [km]')
-plt.xlabel('Aika [s]')
-st.pyplot(fig)
-
 #Kartta
 st.subheader('Kuljettu reitti kartalla')
 import folium
@@ -184,3 +172,12 @@ route.add_to(my_map)
 my_map.fit_bounds(route.get_bounds())
 
 st_map = st_folium(my_map, width=900, height=650)
+
+# Matka ajan funktiona kuvaaja
+st.subheader('Matka ajan funktiona')
+import matplotlib.pyplot as plt
+fig, ax = plt.subplots(figsize=(10,5))
+plt.plot(df['Time (s)'],df['total_distance'])
+plt.ylabel('Kokonaismatka [km]')
+plt.xlabel('Aika [s]')
+st.pyplot(fig)
